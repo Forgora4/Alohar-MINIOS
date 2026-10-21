@@ -18,6 +18,10 @@ class alohar:
         }
         self.boot_time = time.time()
         self.is_running = True
+        self.processes = {}
+        self.next_pid = 1
+        self.total_memory = 4096
+        self.used_memory = 0
         
         self.cmd = {
             "help": self.cmdhelp,
@@ -30,6 +34,12 @@ class alohar:
             "logout": self.logout,
             "systeminfo": self.systeminfo,
             "exit": self.exit,
+            "process": self.process,
+            "run": self.run_process,
+            "kill": self.kill,
+            "memory": self.memory,
+            "allocate": self.allocate,
+            "free": self.free,
             "pwd": self.pwd,
             "ls": self.ls,
             "cd": self.cd,
@@ -183,6 +193,116 @@ class alohar:
             print(f"'{args[0]}' is a directory, not a file.")
         except Exception as e:
             print(f"Error reading file: {e}")
+    # PROCESS MANAGEMENT: Display running processes
+    def process(self, args):
+        if not self.processes:
+            print("No running processes.")
+            return
+
+        print("\nPROCESS LIST")
+        print("-" * 40)
+        print(f"{'PID':<8}{'NAME':<20}{'STATUS'}")
+        print("-" * 40)
+
+        for pid, process in self.processes.items():
+            print(f"{pid:<8}{process['name']:<20}{process['status']}")
+
+    # PROCESS MANAGEMENT: Start a simulated process
+    def run_process(self, args):
+        if not args:
+            print("Usage: run <process_name>")
+            return
+
+        process_name = args[0]
+        pid = self.next_pid
+
+        self.processes[pid] = {
+            "name": process_name,
+            "status": "RUNNING"
+        }
+
+        self.next_pid += 1
+
+        print("Process started.")
+        print(f"PID: {pid}")
+        print(f"Name: {process_name}")
+        print("Status: RUNNING")
+
+    # PROCESS MANAGEMENT: Terminate a simulated process
+    def kill(self, args):
+        if not args:
+            print("Usage: kill <PID>")
+            return
+
+        try:
+            pid = int(args[0])
+
+            if pid in self.processes:
+                del self.processes[pid]
+                print(f"Process {pid} terminated.")
+            else:
+                print("Error: Process does not exist.")
+
+        except ValueError:
+            print("Error: PID must be a number.")
+
+    # MEMORY MANAGEMENT: Display memory status
+    def memory(self, args):
+        free_memory = self.total_memory - self.used_memory
+
+        print("\nMEMORY STATUS")
+        print("-" * 30)
+        print(f"Total Memory: {self.total_memory} MB")
+        print(f"Used Memory:  {self.used_memory} MB")
+        print(f"Free Memory:  {free_memory} MB")
+
+    # MEMORY MANAGEMENT: Allocate simulated memory
+    def allocate(self, args):
+        if not args:
+            print("Usage: allocate <amount_MB>")
+            return
+
+        try:
+            amount = int(args[0])
+
+            if amount <= 0:
+                print("Error: Amount must be greater than zero.")
+                return
+
+            free_memory = self.total_memory - self.used_memory
+
+            if amount > free_memory:
+                print("Error: Not enough available memory.")
+                return
+
+            self.used_memory += amount
+            print(f"{amount} MB allocated.")
+
+        except ValueError:
+            print("Error: Please enter a valid number.")
+
+    # MEMORY MANAGEMENT: Release simulated memory
+    def free(self, args):
+        if not args:
+            print("Usage: free <amount_MB>")
+            return
+
+        try:
+            amount = int(args[0])
+
+            if amount <= 0:
+                print("Error: Amount must be greater than zero.")
+                return
+
+            if amount > self.used_memory:
+                print("Error: Cannot release more memory than allocated.")
+                return
+
+            self.used_memory -= amount
+            print(f"{amount} MB released.")
+
+        except ValueError:
+            print("Error: Please enter a valid number.")
 
     #Diri kamo add new commands, ninyo try lang follow format ko like def 
     # cd(self, args):
