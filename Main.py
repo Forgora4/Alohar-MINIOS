@@ -193,6 +193,7 @@ class alohar:
             print(f"'{args[0]}' is a directory, not a file.")
         except Exception as e:
             print(f"Error reading file: {e}")
+
     # PROCESS MANAGEMENT: Display running processes
     def process(self, args):
         if not self.processes:
