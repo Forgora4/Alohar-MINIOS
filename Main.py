@@ -2,10 +2,12 @@ import os
 import getpass
 import hashlib
 import hmac
+import shutil
+import shlex
 import struct
 import time
 from datetime import datetime
-
+# LUIS- Main CLI framework
 class alohar:
     def __init__(self, hostname = "aloharos", username="root"):
         self.hostname = hostname
@@ -43,7 +45,13 @@ class alohar:
             "pwd": self.pwd,
             "ls": self.ls,
             "cd": self.cd,
-            "cat": self.cat
+            "cat": self.cat,
+            "read": self.cat,
+            "create": self.create_file,
+            "write": self.write_file,
+            "delete": self.delete_file,
+            "mkdir": self.make_directory,
+            "rmdir": self.remove_directory
             # diri ka add sang new commands ninyo like "cd": self.cd
         }
     
@@ -61,7 +69,11 @@ class alohar:
             raw_input = input(f"[{prompt_time}] AloharOS# ").strip()
             if not raw_input:
                 continue
-            parts = raw_input.split()
+            try:
+                parts = shlex.split(raw_input)
+            except ValueError as e:
+                print(f"Invalid command syntax: {e}")
+                continue
             cmd = parts[0].lower()
             args = parts[1:]
             
@@ -151,48 +163,172 @@ class alohar:
         print(f"\n{border}")
 
 
-    #Show current working directory path
+    # Ondrej: File management developer
     def pwd(self, args):
         print(os.getcwd())
 
-        #List files and folders in the current directory
+    # Ondrej: File management developer
     def ls(self, args):
+        directory = " ".join(args) if args else "."
         try:
-            items = os.listdir('.')
+            items = os.listdir(directory)
             for item in sorted(items):
                 print(f"  {item}")
-        except Exception as e:
+        except FileNotFoundError:
+            print(f"Directory not found: {directory}")
+        except NotADirectoryError:
+            print(f"Not a directory: {directory}")
+        except PermissionError:
+            print(f"Permission denied: {directory}")
+        except OSError as e:
             print(f"Error listing directory: {e}")
 
-            #Change directory (e.g., cd folder_name or cd ..)
+    # Ondrej: File management developer
     def cd(self, args):
         if not args:
             print("Usage: cd <directory>")
             return
+        directory = " ".join(args)
         try:
-            os.chdir(args[0])
+            os.chdir(directory)
             print(f"Moved to: {os.getcwd()}")
         except FileNotFoundError:
-            print(f"Directory not found: {args[0]}")
+            print(f"Directory not found: {directory}")
         except NotADirectoryError:
-            print(f"Not a directory: {args[0]}")
+            print(f"Not a directory: {directory}")
         except PermissionError:
-            print(f"Permission denied: {args[0]}")
+            print(f"Permission denied: {directory}")
 
-            #Read and display the contents of a text file
+    # Ondrej: File management developer
     def cat(self, args):
         if not args:
             print("Usage: cat <filename>")
             return
+        filename = " ".join(args)
         try:
-            with open(args[0], 'r', encoding='utf-8') as f:
+            with open(filename, "r", encoding="utf-8") as f:
                 print(f.read())
         except FileNotFoundError:
-            print(f"File not found: {args[0]}")
+            print(f"File not found: {filename}")
         except IsADirectoryError:
-            print(f"'{args[0]}' is a directory, not a file.")
-        except Exception as e:
+            print(f"'{filename}' is a directory, not a file.")
+        except PermissionError:
+            print(f"Permission denied: {filename}")
+        except OSError as e:
             print(f"Error reading file: {e}")
+
+
+    # Ondrej: File management developer
+    def create_file(self, args):
+        if not args:
+            print("Usage: create <filename>")
+            return
+
+        filename = " ".join(args)
+        try:
+            with open(filename, "x", encoding="utf-8"):
+                pass
+            print(f"File created: {filename}")
+        except FileExistsError:
+            print(f"File already exists: {filename}")
+        except PermissionError:
+            print(f"Permission denied: {filename}")
+        except OSError as e:
+            print(f"Error creating file: {e}")
+
+    # Ondrej: File management developer
+    def write_file(self, args):
+        if len(args) < 2:
+            print('Usage: write <filename> "<text>"')
+            return
+
+        filename = args[0]
+        text = " ".join(args[1:])
+        try:
+            with open(filename, "a", encoding="utf-8") as f:
+                f.write(text + "\n")
+            print(f"Text added to: {filename}")
+        except PermissionError:
+            print(f"Permission denied: {filename}")
+        except OSError as e:
+            print(f"Error writing file: {e}")
+
+    # Ondrej: File management developer
+    def delete_file(self, args):
+        if not args:
+            print("Usage: delete <filename>")
+            return
+
+        filename = " ".join(args)
+        if not os.path.isfile(filename):
+            print(f"File not found: {filename}")
+            return
+
+        try:
+            os.remove(filename)
+            print(f"File deleted: {filename}")
+        except PermissionError:
+            print(f"Permission denied: {filename}")
+        except OSError as e:
+            print(f"Error deleting file: {e}")
+
+    # Ondrej: File management developer
+    def make_directory(self, args):
+        if not args:
+            print("Usage: mkdir <foldername>")
+            return
+
+        directory = " ".join(args)
+        try:
+            os.mkdir(directory)
+            print(f"Folder created: {directory}")
+        except FileExistsError:
+            print(f"Folder or file already exists: {directory}")
+        except PermissionError:
+            print(f"Permission denied: {directory}")
+        except OSError as e:
+            print(f"Error creating folder: {e}")
+
+    # Ondrej: File management developer
+    def remove_directory(self, args):
+        if not args:
+            print("Usage: rmdir <foldername>")
+            return
+
+        directory = " ".join(args)
+        if not os.path.isdir(directory):
+            print(f"Folder not found: {directory}")
+            return
+
+        current_directory = os.path.realpath(os.getcwd())
+        target_directory = os.path.realpath(directory)
+        try:
+            if os.path.commonpath(
+                [current_directory, target_directory]
+            ) != current_directory or target_directory == current_directory:
+                print("Permission denied: choose a folder inside the current directory.")
+                return
+        except ValueError:
+            print("Permission denied: choose a folder inside the current directory.")
+            return
+
+        confirmation = input(
+            f"Delete folder '{directory}' and all its contents? (y/N): "
+        ).strip().lower()
+        if confirmation != "y":
+            print("Folder deletion cancelled.")
+            return
+
+        try:
+            shutil.rmtree(directory)
+            print(f"Folder deleted: {directory}")
+        except PermissionError:
+            print(f"Permission denied: {directory}")
+        except FileNotFoundError:
+            print(f"Folder not found: {directory}")
+        except OSError as e:
+            print(f"Error deleting folder: {e}")
+
     # PROCESS MANAGEMENT: Display running processes
     def process(self, args):
         if not self.processes:
@@ -304,9 +440,7 @@ class alohar:
         except ValueError:
             print("Error: Please enter a valid number.")
 
-    #Diri kamo add new commands, ninyo try lang follow format ko like def 
-    # cd(self, args):
-    # Command to change directory
+
     
 
     
