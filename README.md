@@ -8,7 +8,7 @@ Final project in IT3131.
 - Hanna Alexandra Dela Cruz Caballe
 - Ondrej Stefano Cres Francisco Carpio
 - Aron Adriel Tangco Siason
-- Reynaldo II Delgado Talabucon
+- Reynaldo Delgado Talabucon II
 - Annyleise Seguera Torrechilla
 
 ## Project Description
