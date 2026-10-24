@@ -88,26 +88,32 @@ Password: student
 ## Available Commands
 
 | Command | Description |
-|----------|-------------|
+|---|---|
 | `help` | Display all available commands |
 | `clear` | Clear the terminal screen |
 | `uptime` | Show system uptime |
-| `time` | Display current system time |
-| `whoami` | Show current logged-in user |
+| `time` | Display the current system time |
+| `whoami` | Show the currently logged-in user |
 | `users` | List available users |
 | `login` | Log into the system |
 | `logout` | Log out from the system |
 | `systeminfo` | Display system information |
-| `pwd` | Show current working directory |
-| `ls` | List files and folders |
-| `cd <directory>` | Change directory |
-| `cat <filename>` | Display contents of a text file |
+| `pwd` | Show the current working directory |
+| `ls [directory]` | List files and folders in the current or specified directory |
+| `cd <directory>` | Change the current directory |
+| `mkdir <foldername>` | Create a folder |
+| `rmdir <foldername>` | Delete a folder and its contents after confirmation |
+| `create <filename>` | Create an empty file without overwriting an existing file |
+| `write <filename> "<text>"` | Append a line to a file, creating it if needed |
+| `read <filename>` | Display a text file's contents (`cat` also works) |
+| `cat <filename>` | Display a text file's contents |
+| `delete <filename>` | Permanently delete a file |
 | `process` | Display running processes |
-| `run <process_name>` | Start a process |
-| `kill <PID>` | Terminate a process |
+| `run <process_name>` | Start a simulated process |
+| `kill <PID>` | Terminate a simulated process |
 | `memory` | Display memory usage |
-| `allocate <amount_MB>` | Allocate memory |
-| `free <amount_MB>` | Release allocated memory |
+| `allocate <amount_MB>` | Allocate simulated memory |
+| `free <amount_MB>` | Release simulated memory |
 | `exit` | Exit AloharOS |
 
 ## Developers
